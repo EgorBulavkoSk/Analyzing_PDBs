@@ -1,0 +1,10 @@
+import MDAnalysis as mda
+
+u = mda.Universe('/home/lab1/Desktop/Egor/triazavirin/hem_aftcal_tzv/hem_aftcal_tzv_prod.pdb')
+target_res = u.select_atoms('resid 330')
+res_within_radius = u.select_atoms("(around 5 resname TZV) and not resname TIP3")
+
+atoms_near = []
+for atom in res_within_radius.residues.atoms:
+    atoms_near.append(atom.index)
+    print(atom.index, atom.name)
