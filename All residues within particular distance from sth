@@ -1,3 +1,4 @@
+```python
 import MDAnalysis as mda
 
 u = mda.Universe('/home/lab1/Desktop/Egor/triazavirin/hem_aftcal_tzv/hem_aftcal_tzv_prod.pdb')
@@ -8,3 +9,4 @@ atoms_near = []
 for atom in res_within_radius.residues.atoms:
     atoms_near.append(atom.index)
     print(atom.index, atom.name)
+```
