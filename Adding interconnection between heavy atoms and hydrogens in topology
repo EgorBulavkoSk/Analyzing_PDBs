@@ -1,0 +1,69 @@
+# Generation of (atom, number) pairs
+def find_directive(name, f):
+    file = open(f, 'r')
+    lines = file.readlines()
+    atoms_sec_begin, atoms_sec_end = None, None
+    for i, line in enumerate(lines):
+        if line.strip() == name:
+            atoms_sec_begin = i+2
+        elif line.strip() == '' and atoms_sec_begin != None:
+            atoms_sec_end = i-1
+            break
+    atoms_sec = lines[atoms_sec_begin:atoms_sec_end+1]
+    file.close()
+    return atoms_sec
+
+atoms_sec = find_directive('[ atoms ]', './complex_test/tzv_GMX_full.top')
+atom_num_original = {}
+for atom in atoms_sec:
+    props = atom.strip().split()
+    atom_num_original[int(props[0])] = props[4]
+
+atoms_sec_final = find_directive('[ atoms ]', './modified_atoms_sec.txt')
+atoms_num_final = {}
+for atom in atoms_sec_final:
+    props = atom.strip().split()
+    atoms_num_final[props[4]] = int(props[0])
+
+bonds_sec = find_directive('[ bonds ]', './complex_test/tzv_GMX_full.top')
+pairs_sec = find_directive('[ pairs ]', './complex_test/tzv_GMX_full.top')
+angles_sec = find_directive('[ angles ]', './complex_test/tzv_GMX_full.top')
+dihedrals_sec = find_directive('[ dihedrals ] ; propers', './complex_test/tzv_GMX_full.top')
+impropers_sec = find_directive('[ dihedrals ] ; impropers', './complex_test/tzv_GMX_full.top')
+f = open('./complex_test/modified_top.top', 'w')
+f.write('[ bonds ]'+'\n')
+for bond in bonds_sec:
+    columns = bond.strip().split()
+    atom_1, atom_2 = atom_num_original[int(columns[0])], atom_num_original[int(columns[1])]
+    columns[0], columns[1] = str(atoms_num_final[atom_1]), str(atoms_num_final[atom_2])
+    f.write('\t'.join(columns) +'\n')
+
+f.write('[ pairs ]'+'\n')
+for pair in pairs_sec:
+    columns = pair.strip().split()
+    atom_1, atom_2 = atom_num_original[int(columns[0])], atom_num_original[int(columns[1])]
+    columns[0], columns[1] = str(atoms_num_final[atom_1]), str(atoms_num_final[atom_2])
+    f.write('\t'.join(columns) +'\n')
+
+f.write('[ angles ]'+'\n')
+for angle in angles_sec:
+    columns = angle.strip().split()
+    atom_1, atom_2, atom_3 = atom_num_original[int(columns[0])], atom_num_original[int(columns[1])], atom_num_original[int(columns[2])]
+    columns[0], columns[1], columns[2] = str(atoms_num_final[atom_1]), str(atoms_num_final[atom_2]), str(atoms_num_final[atom_3])
+    f.write('\t'.join(columns) +'\n')
+
+f.write('[ dihedrals ] ; propers'+'\n')
+for dihedral in dihedrals_sec:
+    columns = dihedral.strip().split()
+    atom_1, atom_2, atom_3, atom_4 = atom_num_original[int(columns[0])], atom_num_original[int(columns[1])], atom_num_original[int(columns[2])], atom_num_original[int(columns[3])]
+    columns[0], columns[1], columns[2], columns[3] = str(atoms_num_final[atom_1]), str(atoms_num_final[atom_2]), str(atoms_num_final[atom_3]), str(atoms_num_final[atom_4])
+    f.write('\t'.join(columns) +'\n')
+
+f.write('[ dihedrals ] ; impropers'+'\n')
+for improper in impropers_sec:
+    columns = improper.strip().split()
+    atom_1, atom_2, atom_3, atom_4 = atom_num_original[int(columns[0])], atom_num_original[int(columns[1])], atom_num_original[int(columns[2])], atom_num_original[int(columns[3])]
+    columns[0], columns[1], columns[2], columns[3] = str(atoms_num_final[atom_1]), str(atoms_num_final[atom_2]), str(atoms_num_final[atom_3]), str(atoms_num_final[atom_4])
+    f.write('\t'.join(columns) +'\n')
+
+f.close()
